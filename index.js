@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-const apiKey = "YOUR API HERE";
+const apiKey = "591cfdd3-dc9a-4caf-a73c-9e7215c7cf62";
 const API_URL = "https://api.cloudmersive.com";
 
 
@@ -36,14 +36,22 @@ app.post("/artistic", upload.single('imageFile'), async (req, res) => {
             `${API_URL}/image/artistic/painting/${style}`,
             formData,
             {
+                responseType: 'stream'
+            },
+            {
                 headers: {
                     "Apikey": apiKey,
                 }
-            }
+            },
         );
         
-        // Salvar a imagem temporariamente no servidor
-        const tempImagePath = 'public/images/output.jpg'; // Caminho temporário para salvar a imagem
+        const outputFile = response.headers["content-disposition"].match(/filename="([^"]+)"/);
+        const fileName = outputFile[1];
+        console.log(JSON.stringify(response.headers));
+        // console.log(JSON.stringify(response.headers["content-disposition"]));
+        
+        // Salvar a imagem no servidor
+        const tempImagePath = `public/images/${fileName}`;
         const fileStream = fs.createWriteStream(tempImagePath);
         res.render("index.ejs", { image: tempImagePath });
 
